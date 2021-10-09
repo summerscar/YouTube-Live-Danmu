@@ -194,7 +194,7 @@
         return
     }
 
-    const playerContainer = window.top.document.body.querySelector('#player-container')
+    const playerContainer = window.top.document.body.querySelector('#player-container.ytd-watch-flexy')
     const videoRightControlBar = window.top.document.body.querySelector('.ytp-right-controls')
 
     let danmuContainer
@@ -261,6 +261,7 @@
     }
     function insertDanmuConfigBtn() {
         if (videoRightControlBar.querySelector('#DanmuConfigBtn')) return
+        console.log('插入 按钮')
         const btn = document.createElement('button')
         btn.id = 'DanmuConfigBtn'
         btn.innerHTML = '弹幕'
