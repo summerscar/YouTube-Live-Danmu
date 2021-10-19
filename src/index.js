@@ -182,10 +182,8 @@
         timestamp += parseInt(ss) * 1000
         return timestamp
     }
-    console.color = function (string) {
-        let origin = console.log
-        origin.call(this, '%cYoutube Live Danmu: ' + string, 'color: red;font-size: 16px;')
-    }
+
+    console.color = console.log.bind(console, `%cDanMu`, "background:  #ff7b26; color: white; border-radius: 0.5rem; padding: 0 0.5rem")
 
     //   聊天列表
     const chatListElement = document.body.querySelector('#items.yt-live-chat-item-list-renderer')
