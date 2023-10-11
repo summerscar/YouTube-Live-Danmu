@@ -243,7 +243,11 @@
             let { danmuStyle, ...restConfig } = danmuConfig
             config = { ...danmuStyle, ...restConfig }
             Object.entries(config).forEach(([key, val]) => {
-                GM_config.set(key, val);
+                try {
+                     GM_config.set(key, val);
+                } catch (e) {
+                    console.color('error: ' + String(e));
+                }
             })
         }
 
