@@ -204,11 +204,16 @@
     init()
 
     function initAnimateCss() {
+        const emojiStyle = `div#danmuContainer img.emoji {
+            width: 1em;
+            height: 1em;
+            vertical-align: middle;
+        }`
         if (danmuAnimateStyle) {
             danmuAnimateStyle.innerHTML = `@keyframes slidein {
            from { transform: translateX(${playerContainer.clientWidth}px); }
            to   { transform: translateX(-100%); }
-        }`
+        }` + emojiStyle
             return
         }
         const head = window.top.document.querySelector('head')
@@ -216,7 +221,7 @@
         style.innerHTML = `@keyframes slidein {
          from { transform: translateX(${playerContainer.clientWidth}px); }
          to   { transform: translateX(-100%); }
-       }`
+       }` + emojiStyle
         danmuAnimateStyle = style
         head.appendChild(style)
     }
@@ -248,6 +253,7 @@
                 } catch (e) {
                     console.color('error: ' + String(e));
                 }
+               
             })
         }
 
@@ -311,7 +317,7 @@
 
                     [...mutation.addedNodes].forEach(function (el) {
                         if (el.tagName.toLowerCase() === 'yt-live-chat-mode-change-message-renderer') return
-                        const message = el.querySelector('#content #message')?.textContent
+                        const message = el.querySelector('#content #message')?.innerHTML
                         const timestamp = formatTime(el.querySelector('#content #timestamp')?.textContent)
                         if (!timestamp) return
                         const author = el.querySelector('#content yt-live-chat-author-chip')?.textContent
