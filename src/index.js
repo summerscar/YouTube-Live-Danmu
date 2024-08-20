@@ -11,99 +11,85 @@
 // @grant        none
 // ==/UserScript==
 
+;(() => {
+    const escapeHTMLPolicy = trustedTypes.createPolicy('myEscapePolicy', {
+        createHTML: (string) => string.replace(/</g, '&lt;'),
+    })
 
-(function () {
-    'use strict';
+    const defaultSpeed = 10
+    const defaultMaxLines = 10
+    const defaultOpacity = 0.9
+    const defaultColor = 'white'
+    const defaultFontSize = 20
+    const defaultTextShadow = '0 0 5px black'
 
-    const escapeHTMLPolicy = trustedTypes.createPolicy("myEscapePolicy", {
-      createHTML: (string) => string.replace(/</g, "&lt;"),
-    });
-
-    let defaultSpeed = 10
-    let defaultMaxLines = 10
-    let defaultOpacity = 0.9
-    let defaultColor = 'white'
-    let defaultFontSize = 20
-    let defaultTextShadow = '0 0 5px black'
-
-    GM_config.init(
-        {
-            'id': 'DanmuConfig',
-            'title': '弹幕设置',
-            'fields':
-            {
-                'turnON':
-                {
-                    'label': '开启弹幕',
-                    'type': 'checkbox',
-                    'default': true
-                },
-                'fontSize':
-                {
-                    'label': '字号',
-                    'type': 'int',
-                    'default': defaultFontSize
-                },
-                'color':
-                {
-                    'label': '颜色',
-                    'type': 'text',
-                    'default': defaultColor
-                },
-                'opacity':
-                {
-                    'label': '透明度',
-                    'type': 'float',
-                    'default': defaultOpacity
-                },
-                'textShadow':
-                {
-                    'label': '弹幕阴影(textShadow css)',
-                    'type': 'text',
-                    'default': defaultTextShadow
-                },
-                'speed':
-                {
-                    'label': '速度（s）',
-                    'type': 'int',
-                    'default': defaultSpeed
-                },
-                'maxLines':
-                {
-                    'label': '行数',
-                    'type': 'int',
-                    'default': defaultMaxLines
-                }
+    GM_config.init({
+        id: 'DanmuConfig',
+        title: '弹幕设置',
+        fields: {
+            turnON: {
+                label: '开启弹幕',
+                type: 'checkbox',
+                default: true,
             },
-            'events':
-            {
-                'init': function () { },
-                'open': function () { },
-                'save': function () {
-                    let config = {
-                        danmuStyle: {
-                            fontSize: GM_config.get('fontSize'),
-                            color: GM_config.get('color'),
-                            opacity: GM_config.get('opacity'),
-                            textShadow: GM_config.get('textShadow')
-                        },
-                        turnON: GM_config.get('turnON'),
-                        speed: GM_config.get('speed'),
-                        maxLines: GM_config.get('maxLines')
-                    }
-                    setDanmuConfigTurnON(config.turnON)
-                    setDanmuConfig(config)
-                    localStorage.setItem('danmuConfig', JSON.stringify(config))
-                    GM_config.close()
-                },
-                'close': function () { },
-                'reset': function () { }
-            }
-        });
+            fontSize: {
+                label: '字号',
+                type: 'int',
+                default: defaultFontSize,
+            },
+            color: {
+                label: '颜色',
+                type: 'text',
+                default: defaultColor,
+            },
+            opacity: {
+                label: '透明度',
+                type: 'float',
+                default: defaultOpacity,
+            },
+            textShadow: {
+                label: '弹幕阴影(textShadow css)',
+                type: 'text',
+                default: defaultTextShadow,
+            },
+            speed: {
+                label: '速度（s）',
+                type: 'int',
+                default: defaultSpeed,
+            },
+            maxLines: {
+                label: '行数',
+                type: 'int',
+                default: defaultMaxLines,
+            },
+        },
+        events: {
+            init: () => {},
+            open: () => {},
+            save: () => {
+                const config = {
+                    danmuStyle: {
+                        fontSize: GM_config.get('fontSize'),
+                        color: GM_config.get('color'),
+                        opacity: GM_config.get('opacity'),
+                        textShadow: GM_config.get('textShadow'),
+                    },
+                    turnON: GM_config.get('turnON'),
+                    speed: GM_config.get('speed'),
+                    maxLines: GM_config.get('maxLines'),
+                }
+                setDanmuConfigTurnON(config.turnON)
+                setDanmuConfig(config)
+                localStorage.setItem('danmuConfig', JSON.stringify(config))
+                GM_config.close()
+            },
+            close: () => {},
+            reset: () => {},
+        },
+    })
 
     // danmu Controller
     class DanmuController {
-
         constructor(config = {}) {
             this.turnON = true
             this.danmuStyle = {}
@@ -122,28 +108,28 @@
             this.turnON = bol
         }
         setDanmuConfig({ speed, maxLines, danmuStyle } = {}) {
-            speed ?? (this.speed = speed);
-            maxLines ?? (this.maxLines = maxLines);
-            this.danmuStyle = { ...this.danmuStyle, ...danmuStyle };
+            speed ?? (this.speed = speed)
+            maxLines ?? (this.maxLines = maxLines)
+            this.danmuStyle = { ...this.danmuStyle, ...danmuStyle }
         }
         createDanmu(danmu) {
-            let danmuEl = document.createElement('span')
+            const danmuEl = document.createElement('span')
             danmuEl.style.color = this.danmuStyle.color
             danmuEl.style.opacity = this.danmuStyle.opacity
-            danmuEl.style.fontSize = this.danmuStyle.fontSize + 'px'
+            danmuEl.style.fontSize = `${this.danmuStyle.fontSize}px`
             danmuEl.style.whiteSpace = 'nowrap'
             danmuEl.style.textShadow = this.danmuStyle.textShadow
             danmuEl.style.animation = `slidein ${this.speed}s linear`
-            danmuEl.style.top = `${this.danmus.length % this.maxLines * (this.danmuStyle.fontSize + 15)}px`
+            danmuEl.style.top = `${(this.danmus.length % this.maxLines) * (this.danmuStyle.fontSize + 15)}px`
             danmuEl.style.position = 'absolute'
             danmuEl.style.display = 'inline-block'
 
-            danmuEl.innerHTML = escapeHTMLPolicy.createHTML(danmu.message);
+            danmuEl.innerHTML = escapeHTMLPolicy.createHTML(danmu.message)
             danmuEl.setAttribute('data-timestamp', danmu.timestamp)
             danmuEl.setAttribute('data-author', danmu.author)
             danmuEl.onanimationend = () => {
                 this.removeDanmu(danmuEl)
-            };
+            }
 
             this.danmusEl.push(danmuEl)
             this.parent.appendChild(danmuEl)
@@ -161,18 +147,22 @@
         }
         pause() {
             this.isPlaying = false
-            this.danmusEl.forEach(function (item) { item.style.animationPlayState = 'paused' });
+            this.danmusEl.forEach((item) => {
+                item.style.animationPlayState = 'paused'
+            })
         }
         play() {
             this.isPlaying = true
-            this.danmusEl.forEach(function (item) { item.style.animationPlayState = 'running' });
+            this.danmusEl.forEach((item) => {
+                item.style.animationPlayState = 'running'
+            })
         }
         removeDanmu(danmuEl) {
             danmuEl.remove()
             this.danmusEl.splice(this.danmusEl.indexOf(danmuEl), 1)
         }
         clear() {
-            this.danmusEl.forEach(danmuEl => danmuEl.remove())
+            this.danmusEl.forEach((danmuEl) => danmuEl.remove())
             this.danmusEl = []
         }
     }
@@ -181,13 +171,17 @@
         time = time.replace('PM', '').replace('AM', '').trim()
         const [hh, mm, ss] = time.padStart(8, '00:').split(':')
         let timestamp = 0
-        timestamp += parseInt(hh) * 1000 * 60 * 60
-        timestamp += parseInt(mm) * 1000 * 60
-        timestamp += parseInt(ss) * 1000
+        timestamp += Number.parseInt(hh) * 1000 * 60 * 60
+        timestamp += Number.parseInt(mm) * 1000 * 60
+        timestamp += Number.parseInt(ss) * 1000
         return timestamp
     }
 
-    console.color = console.log.bind(console, `%cDanMu`, "background:  #ff7b26; color: white; border-radius: 0.5rem; padding: 0 0.5rem")
+    console.color = console.log.bind(
+        console,
+        '%cDanMu',
+        'background:  #ff7b26; color: white; border-radius: 0.5rem; padding: 0 0.5rem',
+    )
 
     //   聊天列表
     const chatListElement = document.body.querySelector('#items.yt-live-chat-item-list-renderer')
@@ -214,24 +208,28 @@
             vertical-align: middle;
         }`
         if (danmuAnimateStyle) {
-            danmuAnimateStyle.innerHTML = escapeHTMLPolicy.createHTML(`@keyframes slidein {
+            danmuAnimateStyle.innerHTML = escapeHTMLPolicy.createHTML(
+                `@keyframes slidein {
            from { transform: translateX(${playerContainer.clientWidth}px); }
            to   { transform: translateX(-100%); }
-        }` + emojiStyle)
+        }${emojiStyle}`,
+            )
             return
         }
         const head = window.top.document.querySelector('head')
-        let style = document.createElement('style')
-        style.innerHTML = escapeHTMLPolicy.createHTML(`@keyframes slidein {
+        const style = document.createElement('style')
+        style.innerHTML = escapeHTMLPolicy.createHTML(
+            `@keyframes slidein {
          from { transform: translateX(${playerContainer.clientWidth}px); }
          to   { transform: translateX(-100%); }
-       }` + emojiStyle)
+       }${emojiStyle}`,
+        )
         danmuAnimateStyle = style
         head.appendChild(style)
     }
     function init() {
         if (!playerContainer) return
-        let div = document.createElement('div')
+        const div = document.createElement('div')
         div.id = 'danmuContainer'
         div.style.position = 'absolute'
         div.style.left = '0'
@@ -249,26 +247,25 @@
         let config = {}
         if (danmuConfig) {
             danmuConfig = JSON.parse(danmuConfig)
-            let { danmuStyle, ...restConfig } = danmuConfig
+            const { danmuStyle, ...restConfig } = danmuConfig
             config = { ...danmuStyle, ...restConfig }
             Object.entries(config).forEach(([key, val]) => {
                 try {
-                     GM_config.set(key, val);
+                    GM_config.set(key, val)
                 } catch (e) {
-                    console.color('error: ' + String(e));
+                    console.color(`error: ${String(e)}`)
                 }
-               
             })
         }
 
         danmuController = new DanmuController({ parent: danmuContainer, ...config })
         addVideoEvent()
         insertDanmuConfigBtn()
-        window.addEventListener('unload', function (event) {
-            observer && observer.disconnect()
+        window.addEventListener('unload', (event) => {
+            observer?.disconnect()
             setDanmuConfigTurnON(false)
             console.color('unload')
-        });
+        })
         console.color('inited !')
     }
     function insertDanmuConfigBtn() {
@@ -279,7 +276,7 @@
         btn.innerHTML = escapeHTMLPolicy.createHTML('弹幕')
         btn.style.verticalAlign = 'top'
         btn.classList.add('ytp-button')
-        btn.onclick = () => GM_config.open();
+        btn.onclick = () => GM_config.open()
         videoRightControlBar.insertBefore(btn, videoRightControlBar.firstChild)
     }
     function playDanmu() {
@@ -299,7 +296,7 @@
     }
     function addVideoEvent() {
         videoEl = playerContainer.querySelector('video')
-        let isSeeking = false
+        const isSeeking = false
         videoEl.addEventListener('play', playDanmu)
         videoEl.addEventListener('seeked', setIsSeeked)
         videoEl.addEventListener('pause', pauseDanmu)
@@ -318,8 +315,7 @@
             switch (mutation.type) {
                 case 'childList':
                     if (!mutation.addedNodes.length) return
-
-                    [...mutation.addedNodes].forEach(function (el) {
+                    ;[...mutation.addedNodes].forEach((el) => {
                         if (el.tagName.toLowerCase() === 'yt-live-chat-mode-change-message-renderer') return
                         const message = el.querySelector('#content #message')?.innerHTML
                         const timestamp = formatTime(el.querySelector('#content #timestamp')?.textContent)
@@ -327,17 +323,15 @@
                         const author = el.querySelector('#content yt-live-chat-author-chip')?.textContent
                         danmuController.push({ timestamp, message, author })
                     })
-                    break;
+                    break
                 case 'attributes':
-                    break;
-
+                    break
             }
         })
     }
     // observer
     if (observer) observer.disconnect()
-    observer = new MutationObserver(observerCallback);
-    observer.observe(chatListElement, { subtree: false, childList: true });
+    observer = new MutationObserver(observerCallback)
+    observer.observe(chatListElement, { subtree: false, childList: true })
     console.color('start observer')
-
-})();
+})()
