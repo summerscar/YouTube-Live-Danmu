@@ -15,6 +15,10 @@
 (function () {
     'use strict';
 
+    const escapeHTMLPolicy = trustedTypes.createPolicy("myEscapePolicy", {
+      createHTML: (string) => string.replace(/</g, "&lt;"),
+    });
+
     let defaultSpeed = 10
     let defaultMaxLines = 10
     let defaultOpacity = 0.9
@@ -134,7 +138,7 @@
             danmuEl.style.position = 'absolute'
             danmuEl.style.display = 'inline-block'
 
-            danmuEl.innerHTML = danmu.message
+            danmuEl.innerHTML = escapeHTMLPolicy.createHTML(danmu.message);
             danmuEl.setAttribute('data-timestamp', danmu.timestamp)
             danmuEl.setAttribute('data-author', danmu.author)
             danmuEl.onanimationend = () => {
@@ -210,18 +214,18 @@
             vertical-align: middle;
         }`
         if (danmuAnimateStyle) {
-            danmuAnimateStyle.innerHTML = `@keyframes slidein {
+            danmuAnimateStyle.innerHTML = escapeHTMLPolicy.createHTML(`@keyframes slidein {
            from { transform: translateX(${playerContainer.clientWidth}px); }
            to   { transform: translateX(-100%); }
-        }` + emojiStyle
+        }` + emojiStyle)
             return
         }
         const head = window.top.document.querySelector('head')
         let style = document.createElement('style')
-        style.innerHTML = `@keyframes slidein {
+        style.innerHTML = escapeHTMLPolicy.createHTML(`@keyframes slidein {
          from { transform: translateX(${playerContainer.clientWidth}px); }
          to   { transform: translateX(-100%); }
-       }` + emojiStyle
+       }` + emojiStyle)
         danmuAnimateStyle = style
         head.appendChild(style)
     }
@@ -272,7 +276,7 @@
         console.log('插入 按钮')
         const btn = document.createElement('button')
         btn.id = 'DanmuConfigBtn'
-        btn.innerHTML = '弹幕'
+        btn.innerHTML = escapeHTMLPolicy.createHTML('弹幕')
         btn.style.verticalAlign = 'top'
         btn.classList.add('ytp-button')
         btn.onclick = () => GM_config.open();
