@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Live Danmu
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  Youtube Live Danmu
 // @author       summerscar
 // @match        https://www.youtube.com/*
@@ -12,9 +12,8 @@
 // ==/UserScript==
 
 ;(() => {
-    const escapeHTMLPolicy = trustedTypes.createPolicy('myEscapePolicy', {
-        createHTML: (string) => string,
-    })
+    // https://github.com/Tampermonkey/tampermonkey/issues/1334#issuecomment-927277844
+    window.trustedTypes.createPolicy('default', { createHTML: (string, sink) => string })
 
     const defaultSpeed = 10
     const defaultMaxLines = 10
@@ -124,7 +123,7 @@
             danmuEl.style.position = 'absolute'
             danmuEl.style.display = 'inline-block'
 
-            danmuEl.innerHTML = escapeHTMLPolicy.createHTML(danmu.message)
+            danmuEl.innerHTML = danmu.message
             danmuEl.setAttribute('data-timestamp', danmu.timestamp)
             danmuEl.setAttribute('data-author', danmu.author)
             danmuEl.onanimationend = () => {
@@ -208,22 +207,19 @@
             vertical-align: middle;
         }`
         if (danmuAnimateStyle) {
-            danmuAnimateStyle.innerHTML = escapeHTMLPolicy.createHTML(
-                `@keyframes slidein {
+            danmuAnimateStyle.innerHTML = `@keyframes slidein {
            from { transform: translateX(${playerContainer.clientWidth}px); }
            to   { transform: translateX(-100%); }
-        }${emojiStyle}`,
-            )
+        }${emojiStyle}`
+
             return
         }
         const head = window.top.document.querySelector('head')
         const style = document.createElement('style')
-        style.innerHTML = escapeHTMLPolicy.createHTML(
-            `@keyframes slidein {
+        style.innerHTML = `@keyframes slidein {
          from { transform: translateX(${playerContainer.clientWidth}px); }
          to   { transform: translateX(-100%); }
-       }${emojiStyle}`,
-        )
+       }${emojiStyle}`
         danmuAnimateStyle = style
         head.appendChild(style)
     }
@@ -273,7 +269,7 @@
         console.log('插入 按钮')
         const btn = document.createElement('button')
         btn.id = 'DanmuConfigBtn'
-        btn.innerHTML = escapeHTMLPolicy.createHTML('弹幕')
+        btn.innerHTML = '弹幕'
         btn.style.verticalAlign = 'top'
         btn.classList.add('ytp-button')
         btn.onclick = () => GM_config.open()
