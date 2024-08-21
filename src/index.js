@@ -13,7 +13,7 @@
 
 ;(() => {
     const escapeHTMLPolicy = trustedTypes.createPolicy('myEscapePolicy', {
-        createHTML: (string) => string.replace(/</g, '&lt;'),
+        createHTML: (string) => string,
     })
 
     const defaultSpeed = 10
